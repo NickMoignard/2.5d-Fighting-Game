@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour {
 
-
+    public int lives = 3;
     public GameObject mainCamera;
     public GameObject player2;
     public Fighter playerPrefab;
     public float CAMERA_SPEED;
+
 
     private Vector3 cameraInitPos;
     private Vector3 playerInitPos;
@@ -17,14 +18,16 @@ public class GameManager : MonoBehaviour {
     public Vector3 spawn1 = new Vector3(-1, 0, 0);
     public Vector3 spawn2 = new Vector3(1, 0, 0);
     public Quaternion spawnRotation = Quaternion.identity;
+    private int totalNoFighters;
 
     // Use this for initialization
     void Start () {
-        //SpawnPlayer();
-
-
+        
+        spawnRotation.SetFromToRotation(new Vector3(0,0,-1), new Vector3(-1,0,0));
+        SpawnPlayer();
+        
         mainCamera = transform.Find("Camera").gameObject;
-        player2 = transform.Find("Player 2").gameObject;
+        
 
         cameraInitPos = mainCamera.transform.position;
         playerInitPos = player2.transform.position;
@@ -35,30 +38,53 @@ public class GameManager : MonoBehaviour {
 
         Debug.Log(cameraInitPos + " <-- camera }{ player --> " + playerInitPos);
     }
-	
-	// Update is called once per frame
-	void Update () {
-
-        Vector3 player2Pos = transform.Find("Player 2").transform.position;
-        Vector3 camPos = transform.Find("Camera").transform.position;
 
 
-        moveCameraVector = new Vector3(player2Pos.x - camPos.x, player2Pos.y - camPos.y + cameraVerticalDistancetoPlayer, 0);
-        mainCamera.transform.Translate(moveCameraVector * Time.deltaTime * CAMERA_SPEED);
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (mainCamera != null && player2 != null)
+        {
+            Vector3 player2Pos = player2.transform.position;
+            Vector3 camPos = mainCamera.transform.position;
+            moveCameraVector = new Vector3(player2Pos.x - camPos.x, player2Pos.y - camPos.y + cameraVerticalDistancetoPlayer, 0);
+            mainCamera.transform.Translate(moveCameraVector * Time.deltaTime * CAMERA_SPEED);
+        } else
+        {
+            checkGameState();
+        }
+        
     }
 
     void SpawnPlayer()
     {
-        // Load Player 1
-
-        Fighter player2 = Instantiate(playerPrefab, spawn1, spawnRotation) as Fighter;
+        
+        // Load Player 
+        Fighter clone = Instantiate(playerPrefab, spawn1, spawnRotation) as Fighter;
+        clone.transform.parent = transform;
+        player2 = clone.gameObject;
+        
     }
 
     void DestroyPlayer1()
     {
         Debug.Log("whats up people");
-        DestroyImmediate(player2);
+        Destroy(player2);
     }
+
+    void checkGameState()
+    {
+        Debug.Log(GetComponentsInChildren<Fighter>().Length);
+        if (GetComponentsInChildren<Fighter>().Length < totalNoFighters)
+        {
+            // we have correct number of fighters
+        } else
+        {
+            SpawnPlayer();
+        }
+    }
+
 
     void OnEnable()
     {

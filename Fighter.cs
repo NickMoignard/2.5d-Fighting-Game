@@ -233,14 +233,14 @@ public class Fighter : MonoBehaviour {
 
     void OnCollisionEnter(Collision collision)
     {
-        if (!Regex.IsMatch(collision.gameObject.name, "Player")) 
+        if (!Regex.IsMatch(collision.gameObject.name, "[Player,Ground]")) 
             Debug.Log("collision detected with " + collision.gameObject.name);
 
         if (Regex.IsMatch(collision.gameObject.name, "_Bounds"))
         {
-            Debug.Log("hit the floor");
+
             // ==================================================================================================================================================================== hard coded value
-            //EventManager.TriggerEvent("Destroy_Player_1");
+            EventManager.TriggerEvent("Destroy_Player_1");
         }
     }
 
