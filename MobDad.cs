@@ -13,7 +13,7 @@ public class MobDad : Character {
         MaxHealth = 200;
         MoveSpeed = 15;
         fighter.JumpVelocity = 20;
-        fighter.MaxJumps = MAX_JUMPS;
-        JumpSize = 15;
+        fighter.MaxJumps = (MAX_JUMPS != 0)? MAX_JUMPS : 2;
+        JumpSize = 20;
     }
 }

@@ -10,7 +10,7 @@ public class FollowPlayer1 : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         mainCamera = GetComponent<Camera>();
-        player = GetComponent<Player>();
+        player = GetComponentInParent<Player>();
 	}
 	
 	// Update is called once per frame

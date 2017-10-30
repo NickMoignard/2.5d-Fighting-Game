@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 public class Fighter : MonoBehaviour {
 
@@ -27,7 +28,7 @@ public class Fighter : MonoBehaviour {
     public const int kickbackModifierDenominator = 0;
 
     // Movement
-    private Vector3 spawnPosition;
+    private Vector3 initSpawnPosition;
     private Vector3 moveVector = Vector3.zero;
     public Vector3 MoveVector
     {
@@ -111,7 +112,7 @@ public class Fighter : MonoBehaviour {
 
         Debug.Log("Character Name: " + character.CharacterName);
         Debug.Log("Jump size: " + character.JumpSize );
-        spawnPosition = controller.transform.position;
+        initSpawnPosition = controller.transform.position;
         currentHealth = maximumHealth;
     }
 
@@ -140,7 +141,7 @@ public class Fighter : MonoBehaviour {
         moveVector = moveVector * Time.deltaTime;
 
         // negate movement in the Z-axis - 2.5D in one line
-        moveVector.z = spawnPosition.z - transform.position.z;
+        moveVector.z = initSpawnPosition.z - transform.position.z;
         
         // Apply movement vector
         controller.Move(moveVector);
@@ -229,4 +230,18 @@ public class Fighter : MonoBehaviour {
         }
         // Where we will check for walls in order add the advanced wall tech mechanics
     }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (!Regex.IsMatch(collision.gameObject.name, "Player")) 
+            Debug.Log("collision detected with " + collision.gameObject.name);
+
+        if (Regex.IsMatch(collision.gameObject.name, "_Bounds"))
+        {
+            Debug.Log("hit the floor");
+            // ==================================================================================================================================================================== hard coded value
+            //EventManager.TriggerEvent("Destroy_Player_1");
+        }
+    }
+
 }

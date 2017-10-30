@@ -32,8 +32,9 @@ public class Player : Fighter
 
     override public void Update()
     {
-        base.Update();
 
+        base.Update();
+        
         // Get User Input
         Left_X = Input.GetAxis("Horizontal");
         Left_Y = Input.GetAxis("Vertical");
@@ -53,11 +54,11 @@ public class Player : Fighter
 
         if (Input.GetButtonDown("Jump"))
         {
-            Debug.Log("Jump Pressed/nJumps Left: "+ (MaxJumps - JumpCount));
+            Debug.Log("Jump Pressed/nJumps Left: " + (MaxJumps - JumpCount));
 
             Jump();
         }
-            
+
         if (Input.GetButtonDown("A"))
         {
             Debug.Log("A Pressed");
