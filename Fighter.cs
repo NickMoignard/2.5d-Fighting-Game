@@ -100,12 +100,22 @@ public class Fighter : MonoBehaviour {
     public int maximumHealth;
 
 
+    // Grabbing
+    public GrabBox grabBox;
+
     // Methods ================================================================================================================================
+    private void OnEnable()
+    {
+        EventManager.StartListening("X", Hang);
+    }
+    private void OnDisable()
+    {
+        EventManager.StopListening("X", Hang);
+    }
 
     public virtual void Start()
     {   // After loading into scene initialize everthing
         horizontalVelocity = 0;
-
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         character = GetComponent<Character>();
@@ -207,6 +217,35 @@ public class Fighter : MonoBehaviour {
     {
         // ...
     }
+    public virtual void Hang()
+    {
+
+
+
+            if (Physics.CheckSphere(grabBox.transform.position, grabBox.radius))
+            {
+
+                Collider[] colliders = Physics.OverlapSphere(transform.position, grabBox.radius);
+                foreach (Collider collider in colliders)
+                {
+                    if (Regex.IsMatch(collider.name, "Platform"))
+                    {
+                    // start hang
+                    VerticalVelocity = 0;
+                    HorizontalVelocity = 0;
+
+                    Bounds ledge = collider.bounds;
+                    Vector3 ledgePos = ledge.ClosestPoint(this.transform.position);
+
+                    Vector3 curPos = transform.position;
+                    MoveVector = new Vector3(ledgePos.x - curPos.x, ledgePos.y - curPos.y, 0);
+
+                    }
+                }
+            }
+    }
+
+
 
     public void ApplyFriction()
     {   // slow horizontal movement
@@ -230,10 +269,12 @@ public class Fighter : MonoBehaviour {
         }
         // Where we will check for walls in order add the advanced wall tech mechanics
     }
+    
+    
 
     void OnCollisionEnter(Collision collision)
     {
-        if (!Regex.IsMatch(collision.gameObject.name, "[Player,Ground]")) 
+        if (!Regex.IsMatch(collision.gameObject.name, "[Player,Platform]")) 
             Debug.Log("collision detected with " + collision.gameObject.name);
 
         if (Regex.IsMatch(collision.gameObject.name, "_Bounds"))
@@ -242,6 +283,7 @@ public class Fighter : MonoBehaviour {
             // ==================================================================================================================================================================== hard coded value
             EventManager.TriggerEvent("Destroy_Player_1");
         }
+
     }
 
 }

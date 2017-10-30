@@ -86,7 +86,7 @@ public class GameManager : MonoBehaviour {
     }
 
 
-    void OnEnable()
+    private void OnEnable()
     {
         EventManager.StartListening("Destroy_Player_1", DestroyPlayer1);
     }

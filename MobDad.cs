@@ -3,6 +3,7 @@
 public class MobDad : Character {
 
     public int MAX_JUMPS;
+    
 
     override public void Start()
     {

@@ -64,6 +64,9 @@ public class Player : Fighter
             Debug.Log("A Pressed");
             EventManager.TriggerEvent("A");
         }
+        if (Input.GetButtonDown("X"))
+            EventManager.TriggerEvent("X");
+
         Run();
 
     }
@@ -79,6 +82,7 @@ public class Player : Fighter
         }
 
     }
+
 
     override public void Gravity()
     {   // override gravity in order to implement Directional Influence
