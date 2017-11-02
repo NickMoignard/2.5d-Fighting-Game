@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Hitbox : MonoBehaviour {
 
-
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Oww hit my head");
+    }
 
 }

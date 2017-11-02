@@ -106,11 +106,13 @@ public class Fighter : MonoBehaviour {
     // Methods ================================================================================================================================
     private void OnEnable()
     {
+        EventManager.StartListening("FwdA", FwdA);
         EventManager.StartListening("X", Hang);
     }
     private void OnDisable()
     {
         EventManager.StopListening("X", Hang);
+        EventManager.StopListening("FwdA", FwdA);
     }
 
     public virtual void Start()
@@ -186,6 +188,9 @@ public class Fighter : MonoBehaviour {
         // Decrease player health   
         currentHealth -= damage;
 
+        // animate player
+        animator.SetTrigger("Flinch");
+
         // create an inversely proportional relationship between health and kickback force
         float kickbackMultiplier = (currentHealth + kickbackModifierNumerator / maximumHealth + kickbackModifierDenominator);
         direction.Normalize(); // ensure input parameter doesn't contain magnitudal information
@@ -217,26 +222,31 @@ public class Fighter : MonoBehaviour {
     {
         // ...
     }
+
+    public virtual void FwdA()
+    {
+        // ...
+        animator.SetTrigger("FwdA");
+    }
     public virtual void Hang()
     {
-
-
-
             if (Physics.CheckSphere(grabBox.transform.position, grabBox.radius))
             {
-
-                Collider[] colliders = Physics.OverlapSphere(transform.position, grabBox.radius);
+            Debug.Log("tried to find a ledge");
+            Collider[] colliders = Physics.OverlapSphere(transform.position, grabBox.radius);
                 foreach (Collider collider in colliders)
                 {
-                    if (Regex.IsMatch(collider.name, "Platform"))
+                    if (Regex.IsMatch(collider.name, "Ledge"))
                     {
+                    Debug.Log("found a ledge");
+                   
                     // start hang
                     VerticalVelocity = 0;
                     HorizontalVelocity = 0;
 
-                    Bounds ledge = collider.bounds;
-                    Vector3 ledgePos = ledge.ClosestPoint(this.transform.position);
-
+                    
+                    Vector3 ledgePos = collider.transform.position;
+                    Debug.Log(ledgePos);
                     Vector3 curPos = transform.position;
                     MoveVector = new Vector3(ledgePos.x - curPos.x, ledgePos.y - curPos.y, 0);
 

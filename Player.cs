@@ -52,23 +52,112 @@ public class Player : Fighter
             animator.SetBool("FACING_RIGHT", FacingRight);
         }
 
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Y") || Input.GetButtonDown("Jump") )
         {
             Debug.Log("Jump Pressed/nJumps Left: " + (MaxJumps - JumpCount));
+
+            // Check Directions & other button combinations
+            if (Left_X < -0.7 || Left_X > 0.7)
+            {
+                Debug.Log("Y + Left or Right");
+                //EventManager.TriggerEvent("FwdB");
+            }
+            else if (Left_Y < -0.7)
+            {
+                Debug.Log("Y + Up");
+                //EventManager.TriggerEvent("UpB");
+            }
+            else if (Left_Y > 0.7)
+            {
+                //EventManager.TriggerEvent("DownB");
+                Debug.Log("Y + Down");
+            } else
+            {
+                //EventManager.TriggerEvent("B");
+                Debug.Log("Y");
+            }
+            
+           
+
+
 
             Jump();
         }
 
+        if (Input.GetButtonDown("B"))
+        {
+            // Check Directions & other button combinations
+            if (Left_X < -0.7 || Left_X > 0.7)
+            {
+                Debug.Log("B + Left or Right");
+                //EventManager.TriggerEvent("FwdB");
+            }
+            else if (Left_Y < -0.7)
+            {
+                Debug.Log("B + Up");
+                //EventManager.TriggerEvent("UpB");
+            }
+            else if (Left_Y > 0.7)
+            {
+                //EventManager.TriggerEvent("DownB");
+                Debug.Log("B + Down");
+            } else
+            {
+                Debug.Log("B");
+                //EventManager.TriggerEvent("B");
+            }
+
+        }
+
         if (Input.GetButtonDown("A"))
         {
-            Debug.Log("A Pressed");
-            EventManager.TriggerEvent("A");
+            // Check Directions & other button combinations
+            if (Left_X < -0.7 || Left_X > 0.7)
+            {
+                Debug.Log("A + Left or Right");
+                //EventManager.TriggerEvent("FwdA");
+            } else if (Left_Y < -0.7)
+            {
+                Debug.Log("A + Up");
+                //EventManager.TriggerEvent("UpA");
+            } else if (Left_Y > 0.7)
+            {
+                //EventManager.TriggerEvent("DownA");
+                Debug.Log("A + Down");
+            } else
+            {
+                Debug.Log("A");
+                //EventManager.TriggerEvent("A");
+            }
+
         }
+
         if (Input.GetButtonDown("X"))
-            EventManager.TriggerEvent("X");
-
+        {
+            //EventManager.TriggerEvent("X");
+            // Check Directions & other button combinations
+            if (Left_X < -0.7 || Left_X > 0.7)
+            {
+                Debug.Log("X + Left or Right");
+                //EventManager.TriggerEvent("FwdX");
+            }
+            else if (Left_Y > -0.7)
+            {
+                Debug.Log("X + Up");
+                //EventManager.TriggerEvent("UpX");
+            }
+            else if (Left_Y < 0.7)
+            {
+                //EventManager.TriggerEvent("DownX");
+                Debug.Log("X + Down");
+            } else
+            {
+                Debug.Log("X");
+                //
+            }
+            
+        }
         Run();
-
     }
 
     public override void Run()
