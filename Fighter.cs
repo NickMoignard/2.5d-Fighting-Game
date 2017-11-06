@@ -234,6 +234,7 @@ public class Fighter : MonoBehaviour {
         // User input cannot be accurately read with fixeUpdate
         if (MovementEnabled && !GettingUp)
         {
+            Debug.Log("we aint hanging anymore");
             Gravity();
             ApplyFriction();
         } else if (Hanging )
@@ -241,18 +242,15 @@ public class Fighter : MonoBehaviour {
             Vector3 moveV = LedgePos - HangPosition.position;
             Debug.Log("moving = " + moveV.magnitude);
 
-            if (moveV.magnitude < 0.7)
-            {
-                MovingToHang = false;
-            }
-            controller.SimpleMove(moveV * Time.deltaTime * moveV.magnitude * 10);
-            //controller.Move(moveV * Time.deltaTime * moveV.magnitude * 10);
-            
-            
+
+            //controller.SimpleMove(moveV);
+            controller.Move(moveV * Time.deltaTime * moveV.magnitude * 10);
+
+
         }
         //else if (Hanging)
         //{
-           
+
         //    Debug.Log("hanging = " + moveV.magnitude * moveV.magnitude);
         //    controller.Move(moveV * Time.deltaTime);
         //}
