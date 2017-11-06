@@ -28,6 +28,12 @@ public class Fighter : MonoBehaviour {
     public const int kickbackModifierDenominator = 0;
 
     // Movement
+    private bool movementEnabled = true;
+    public bool MovementEnabled
+    {
+        get { return movementEnabled; }
+        set { movementEnabled = value; }
+    }
     private Vector3 initSpawnPosition;
     private Vector3 moveVector = Vector3.zero;
     public Vector3 MoveVector
@@ -101,18 +107,73 @@ public class Fighter : MonoBehaviour {
 
 
     // Grabbing
-    public GrabBox grabBox;
+    public Transform HangPosition
+    {
+        get { return hangPosition; }
+        set { hangPosition = value; }
+    }
+    private Transform hangPosition;
 
+
+    private bool hanging;
+    public bool Hanging
+    {
+        get { return hanging; }
+        set { hanging = value; }
+    }
+    private bool grabbing;
+    public bool Grabbing
+    {
+        get { return grabbing; }
+        set { grabbing = value; }
+    }
+    private bool gettingUp;
+    public bool GettingUp
+    {
+        get { return gettingUp; }
+        set { gettingUp = value; }
+    }
+    private float gettingUpTimer;
+    public float GettingUpTimer
+    {
+        get { return gettingUpTimer; }
+        set { gettingUpTimer = value; }
+    }
+    public float GetUpLength = 0.5f ; 
+    public GrabBox grabBox;
+    private float grabRadius = 5f;
+
+    public float GrabRadius
+    {
+        get { return grabRadius; }
+        set { grabRadius = value; }
+    }
+    private bool canGrabLedge;
+    public bool CanGrabLedge
+    {
+        get { return canGrabLedge; }
+        set { canGrabLedge = value; }
+    }
+    private Vector3 ledgePos;
+    public Vector3 LedgePos
+    {
+        get{ return ledgePos; }
+        set { ledgePos = value; }
+    }
+
+    public bool MovingToHang = false;
     // Methods ================================================================================================================================
     private void OnEnable()
     {
         EventManager.StartListening("FwdA", FwdA);
-        EventManager.StartListening("X", Hang);
+        EventManager.StartListening("Y", Jump);
+        EventManager.StartListening("GetUp", GetUpFromHang);
     }
     private void OnDisable()
     {
-        EventManager.StopListening("X", Hang);
         EventManager.StopListening("FwdA", FwdA);
+        EventManager.StopListening("Y", Jump);
+        EventManager.StopListening("GetUp", GetUpFromHang);
     }
 
     public virtual void Start()
@@ -121,6 +182,8 @@ public class Fighter : MonoBehaviour {
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         character = GetComponent<Character>();
+        HangPosition = transform.Find("HangPosition");
+
 
         Debug.Log("Character Name: " + character.CharacterName);
         Debug.Log("Jump size: " + character.JumpSize );
@@ -130,55 +193,105 @@ public class Fighter : MonoBehaviour {
 
     public virtual void FixedUpdate()
     {
-        // Set max downard speed (replicate terminal velocity)
-        moveVector.y = Mathf.Max(VerticalVelocity, terminalVelocity);
-
-
-        // Dont exceeed termninal velocity in either direction on x axis
-        if (horizontalVelocity < 0)
+        if (MovementEnabled)
         {
-            moveVector.x = Mathf.Max(horizontalVelocity, terminalVelocity);
-        }
-        else
-        {
-            moveVector.x = Mathf.Min(horizontalVelocity, -terminalVelocity);
-        }
+            // Set max downard speed (replicate terminal velocity)
+            moveVector.y = Mathf.Max(VerticalVelocity, terminalVelocity);
 
-        if (jumpVelocity > 0)
-        {   // Apply accumulated jump velocity and reset
-            VerticalVelocity += JumpVelocity;
-            moveVector.y = VerticalVelocity;
-            JumpVelocity = 0;
-        }
-        moveVector = moveVector * Time.deltaTime;
 
-        // negate movement in the Z-axis - 2.5D in one line
-        moveVector.z = initSpawnPosition.z - transform.position.z;
-        
-        // Apply movement vector
-        controller.Move(moveVector);
+            // Dont exceeed termninal velocity in either direction on x axis
+            if (HorizontalVelocity < 0)
+            {
+                moveVector.x = Mathf.Max(HorizontalVelocity, terminalVelocity);
+            }
+            else
+            {
+                moveVector.x = Mathf.Min(HorizontalVelocity, -terminalVelocity);
+            }
+
+            if (jumpVelocity > 0)
+            {   // Apply accumulated jump velocity and reset
+                VerticalVelocity += JumpVelocity;
+                moveVector.y = VerticalVelocity;
+                JumpVelocity = 0;
+            }
+            moveVector = moveVector * Time.deltaTime;
+
+
+            // negate movement in the Z-axis - 2.5D in one line
+            moveVector.z = initSpawnPosition.z - transform.position.z;
+
+
+            // Apply movement vector
+            controller.Move(moveVector);
+        }
+       
     }
 
     public virtual void Update()
     {
+
         // User input cannot be accurately read with fixeUpdate
-        Gravity();
-        ApplyFriction();
+        if (MovementEnabled && !GettingUp)
+        {
+            Gravity();
+            ApplyFriction();
+        } else if (Hanging )
+        {
+            Vector3 moveV = LedgePos - HangPosition.position;
+            Debug.Log("moving = " + moveV.magnitude);
+
+            if (moveV.magnitude < 0.7)
+            {
+                MovingToHang = false;
+            }
+            controller.SimpleMove(moveV * Time.deltaTime * moveV.magnitude * 10);
+            //controller.Move(moveV * Time.deltaTime * moveV.magnitude * 10);
+            
+            
+        }
+        //else if (Hanging)
+        //{
+           
+        //    Debug.Log("hanging = " + moveV.magnitude * moveV.magnitude);
+        //    controller.Move(moveV * Time.deltaTime);
+        //}
+        else if (GettingUp && GettingUpTimer - Time.fixedTime < -GetUpLength)
+        {
+            //controller.Move(moveV * Time.deltaTime);
+            //controller.SimpleMove(moveV * Time.deltaTime * moveV.magnitude * 10);
+        }
     }
 
     public virtual void Gravity()
     {
         if (controller.isGrounded)
         {   // Stop falling and reset jumps
-            VerticalVelocity = 0;
+            VerticalVelocity = 0.001f;
             jumpTimer = 0;
             jumpCount = 0;
-        } else if (controller.velocity.y < 0)
+            animator.SetBool("IsGrounded", true);
+        }
+        else if (GettingUp)
+        {
+            VerticalVelocity = 0;
+            
+        }
+        else if (controller.velocity.y < 0)
         {
             VerticalVelocity -= gravity * Time.deltaTime;
         }
         // Constantly increase gravity
         VerticalVelocity -= gravityIncreaseRate;
+
+        if (VerticalVelocity < 2)
+        {
+            animator.SetBool("IsGrounded", false);
+        } else
+        {
+            animator.SetBool("IsGrounded", true);
+        }
+        animator.SetFloat("VerticalVelocity", VerticalVelocity);
     }
 
     public void TakeHit(int damage, Vector3 direction)
@@ -217,6 +330,10 @@ public class Fighter : MonoBehaviour {
             Debug.Log("Its not triggering");
         }
     }
+    public virtual void Test()
+    {
+        Debug.Log("Testing if we can grab a ledge:" + CanGrabLedge);
+    }
 
     public virtual void Run()
     {
@@ -228,33 +345,45 @@ public class Fighter : MonoBehaviour {
         // ...
         animator.SetTrigger("FwdA");
     }
-    public virtual void Hang()
+
+    public virtual void Hang(Vector3 ledgePos, bool direction)
     {
-            if (Physics.CheckSphere(grabBox.transform.position, grabBox.radius))
-            {
-            Debug.Log("tried to find a ledge");
-            Collider[] colliders = Physics.OverlapSphere(transform.position, grabBox.radius);
-                foreach (Collider collider in colliders)
-                {
-                    if (Regex.IsMatch(collider.name, "Ledge"))
-                    {
-                    Debug.Log("found a ledge");
-                   
-                    // start hang
-                    VerticalVelocity = 0;
-                    HorizontalVelocity = 0;
-
-                    
-                    Vector3 ledgePos = collider.transform.position;
-                    Debug.Log(ledgePos);
-                    Vector3 curPos = transform.position;
-                    MoveVector = new Vector3(ledgePos.x - curPos.x, ledgePos.y - curPos.y, 0);
-
-                    }
-                }
-            }
+        if (CanGrabLedge)
+        {
+            LedgePos = ledgePos;
+            MovementEnabled = false;
+            Hanging = true;
+            animator.SetBool("Hanging", true);
+            Vector3 moveV = ledgePos - HangPosition.position;
+            controller.Move(moveV);
+            JumpCount = 0;
+        } else
+        {
+            ResetHang();
+        }
     }
 
+    void GetUpFromHang()
+    {
+
+        float GettingUpTimer = Time.fixedTime;
+        // allow user movement and give move character up
+        //float x = FacingRight ? -0.058f : 0.058f;
+        MovementEnabled = false;
+        animator.SetTrigger("GetUp");
+
+        animator.SetBool("Hanging", false);
+
+    }
+    public virtual void ResetHang()
+    {
+        GettingUpTimer = 0;
+        animator.SetBool("Hanging", false);
+        CanGrabLedge = false;
+        MovementEnabled = true;
+        Hanging = false;
+    }
+        
 
 
     public void ApplyFriction()

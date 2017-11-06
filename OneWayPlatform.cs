@@ -26,12 +26,12 @@ public class OneWayPlatform : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("We're hitting our head on the platform");
-        Physics.IgnoreCollision(other, platform, true);
+        //Debug.Log("We're hitting our head on the platform");
+        //Physics.IgnoreCollision(other, platform, true);
     }
     private void OnTriggerExit(Collider other)
     {
-        Debug.Log("We made it through the platform");
-        Physics.IgnoreCollision(other, platform, false);
+        //Debug.Log("We made it through the platform");
+        //Physics.IgnoreCollision(other, platform, false);
     }
 }

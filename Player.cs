@@ -55,7 +55,7 @@ public class Player : Fighter
         if (Input.GetButtonDown("Y") || Input.GetButtonDown("Jump") )
         {
             Debug.Log("Jump Pressed/nJumps Left: " + (MaxJumps - JumpCount));
-
+            EventManager.TriggerEvent("Y");
             // Check Directions & other button combinations
             if (Left_X < -0.7 || Left_X > 0.7)
             {
@@ -77,11 +77,7 @@ public class Player : Fighter
                 Debug.Log("Y");
             }
             
-           
 
-
-
-            Jump();
         }
 
         if (Input.GetButtonDown("B"))
@@ -127,34 +123,61 @@ public class Player : Fighter
             } else
             {
                 Debug.Log("A");
+                animator.SetTrigger("A");
                 //EventManager.TriggerEvent("A");
             }
 
         }
 
+
+        // Player is holding X so lets keep hanging
+        if (Input.GetButton("X") && Hanging)
+        {
+            MovementEnabled = false;
+            CanGrabLedge = true;
+
+            if (Input.GetAxis("Right Trigger") > 0.2)
+            {
+                Debug.Log("Recognized the Trigger Pull");
+                EventManager.TriggerEvent("GetUp");
+            }
+
+        } else
+        {
+            ResetHang();
+        }
+
         if (Input.GetButtonDown("X"))
         {
-            //EventManager.TriggerEvent("X");
             // Check Directions & other button combinations
-            if (Left_X < -0.7 || Left_X > 0.7)
+            if (Left_X < -0.7 )
             {
-                Debug.Log("X + Left or Right");
-                //EventManager.TriggerEvent("FwdX");
+                Debug.Log("X + Right");               
             }
-            else if (Left_Y > -0.7)
+            else if (Left_X > 0.7)
+            {
+                Debug.Log("X + Left");
+            }
+            else if (Left_Y < -0.7)
             {
                 Debug.Log("X + Up");
-                //EventManager.TriggerEvent("UpX");
+                EventManager.TriggerEvent("UpX");
+                
             }
-            else if (Left_Y < 0.7)
+            else if (Left_Y > 0.7)
             {
                 //EventManager.TriggerEvent("DownX");
                 Debug.Log("X + Down");
-            } else
+            }
+            else
             {
                 Debug.Log("X");
-                //
-            }
+                EventManager.TriggerEvent("X");
+            }           
+        }
+        else
+        {
+            Grabbing = false;
             
         }
         Run();

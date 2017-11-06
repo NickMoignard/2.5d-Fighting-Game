@@ -49,26 +49,45 @@ public class GrabBox : MonoBehaviour
             // register hits
             if (Physics.CheckSphere(transform.position, this.radius))
             {
-
                 Collider[] colliders = Physics.OverlapSphere(transform.position, this.radius);
                 foreach (Collider collider in colliders)
                 {
-      
-                    if (Regex.IsMatch(collider.name, "Platform") && !hasHit)
+                    if (Regex.IsMatch(collider.name, "Ledge") && !hasHit)
                     {
+                        bool facingLeft = false; 
+                        Debug.Log("Theres a ledge in range");
+                        fighter.CanGrabLedge = true;
+                        ledgePos = collider.transform.position;
 
-                        Bounds ledge = collider.bounds;
-                        ledgePos = ledge.ClosestPoint(this.transform.position);
-                        Debug.Log("platform found");
+                        // the position of the the ledge is located in center of the collider
+                        // we want to grap on the outside edge of the collider
+                        if (Regex.IsMatch(collider.name, "Right"))
+                        {
+                            facingLeft = true;
+                            ledgePos = ledgePos + new Vector3(0.25f,0.125f,0); // slightly right and up
+                        } else if (Regex.IsMatch(collider.name, "Left"))
+                        {
+                            facingLeft = false;
+                            ledgePos = ledgePos + new Vector3(-0.25f, 0.125f, 0); // slightly left and up
+                        }
+                        fighter.Hang(ledgePos, facingLeft);
 
+
+                    } else
+                    {
+                        fighter.CanGrabLedge = false;
                     }
                 }
-            }
-        }
+            } else
+            {
+                fighter.CanGrabLedge = false;
+            } 
+        } 
         else
         {
             // no longer attacking
             attackTimer = 0;
+            fighter.CanGrabLedge = false ;
         }
     }
 
