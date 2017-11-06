@@ -160,6 +160,7 @@ public class Fighter : MonoBehaviour {
         get{ return ledgePos; }
         set { ledgePos = value; }
     }
+    public Vector3 lastMoveVector = Vector3.zero;
 
     public bool MovingToHang = false;
     // Methods ================================================================================================================================
@@ -234,17 +235,31 @@ public class Fighter : MonoBehaviour {
         // User input cannot be accurately read with fixeUpdate
         if (MovementEnabled && !GettingUp)
         {
-            Debug.Log("we aint hanging anymore");
             Gravity();
             ApplyFriction();
         } else if (Hanging )
         {
+            
+            VerticalVelocity = 0;
+
             Vector3 moveV = LedgePos - HangPosition.position;
+
             Debug.Log("moving = " + moveV.magnitude);
 
 
-            //controller.SimpleMove(moveV);
-            controller.Move(moveV * Time.deltaTime * moveV.magnitude * 10);
+            if (moveV.magnitude < 1.5)
+            {
+                controller.Move(moveV * Time.deltaTime * moveV.magnitude * 0.01f);
+            }
+            else if (moveV.magnitude < 3)
+            {
+                controller.Move(moveV * Time.deltaTime * moveV.magnitude * 0.2f);
+            }
+            else
+            {
+                //controller.SimpleMove(moveV);
+                controller.Move(moveV * Time.deltaTime * moveV.magnitude * 5);
+            }
 
 
         }

@@ -64,11 +64,11 @@ public class GrabBox : MonoBehaviour
                         if (Regex.IsMatch(collider.name, "Right"))
                         {
                             facingLeft = true;
-                            ledgePos = ledgePos + new Vector3(0.25f,0.125f,0); // slightly right and up
+
                         } else if (Regex.IsMatch(collider.name, "Left"))
                         {
                             facingLeft = false;
-                            ledgePos = ledgePos + new Vector3(-0.25f, 0.125f, 0); // slightly left and up
+
                         }
                         fighter.Hang(ledgePos, facingLeft);
 
