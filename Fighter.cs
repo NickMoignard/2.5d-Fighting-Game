@@ -237,7 +237,7 @@ public class Fighter : MonoBehaviour {
         {
             Gravity();
             ApplyFriction();
-        } else if (Hanging )
+        } else if (Hanging)
         {
             
             VerticalVelocity = 0;
