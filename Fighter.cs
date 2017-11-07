@@ -119,14 +119,18 @@ public class Fighter : MonoBehaviour {
     public bool Hanging
     {
         get { return hanging; }
-        set { hanging = value; }
+        set
+        {
+            Debug.Log("set the hanging flag");
+            hanging = value;
+        }
     }
-    private bool grabbing;
-    public bool Grabbing
-    {
-        get { return grabbing; }
-        set { grabbing = value; }
-    }
+    //private bool grabbing;
+    //public bool Grabbing
+    //{
+    //    get { return grabbing; }
+    //    set { grabbing = value; }
+    //}
     private bool gettingUp;
     public bool GettingUp
     {
@@ -139,7 +143,7 @@ public class Fighter : MonoBehaviour {
         get { return gettingUpTimer; }
         set { gettingUpTimer = value; }
     }
-    public float GetUpLength = 0.5f ; 
+    public float GetUpLength = 0.5f;
     public GrabBox grabBox;
     private float grabRadius = 5f;
 
@@ -157,7 +161,7 @@ public class Fighter : MonoBehaviour {
     private Vector3 ledgePos;
     public Vector3 LedgePos
     {
-        get{ return ledgePos; }
+        get { return ledgePos; }
         set { ledgePos = value; }
     }
     public Vector3 lastMoveVector = Vector3.zero;
@@ -184,16 +188,15 @@ public class Fighter : MonoBehaviour {
         animator = GetComponent<Animator>();
         character = GetComponent<Character>();
         HangPosition = transform.Find("HangPosition");
-
-
-        Debug.Log("Character Name: " + character.CharacterName);
-        Debug.Log("Jump size: " + character.JumpSize );
         initSpawnPosition = controller.transform.position;
         currentHealth = maximumHealth;
     }
 
     public virtual void FixedUpdate()
     {
+
+
+
         if (MovementEnabled)
         {
             // Set max downard speed (replicate terminal velocity)
@@ -226,11 +229,34 @@ public class Fighter : MonoBehaviour {
             // Apply movement vector
             controller.Move(moveVector);
         }
-       
+
     }
+
+    void UpdateAnimator()
+    {   // check if grounded
+        if (controller.isGrounded)
+        {
+            animator.SetBool("IsGrounded", true);
+            animator.SetBool("Falling", false);
+        }
+        else
+        {
+            animator.SetBool("IsGrounded", false);
+            // falling ?
+            if (VerticalVelocity < -1.1f)
+            {
+                animator.SetBool("Falling", true);
+            } else
+            {
+                animator.SetBool("Falling", false);
+            }
+        }
+    }
+
 
     public virtual void Update()
     {
+        UpdateAnimator();
 
         // User input cannot be accurately read with fixeUpdate
         if (MovementEnabled && !GettingUp)
@@ -239,41 +265,42 @@ public class Fighter : MonoBehaviour {
             ApplyFriction();
         } else if (Hanging)
         {
-            
+            Drop();
             VerticalVelocity = 0;
 
             Vector3 moveV = LedgePos - HangPosition.position;
 
-            Debug.Log("moving = " + moveV.magnitude);
-
-
+            
             if (moveV.magnitude < 1.5)
             {
                 controller.Move(moveV * Time.deltaTime * moveV.magnitude * 0.01f);
+                Debug.Log("1");
             }
             else if (moveV.magnitude < 3)
             {
                 controller.Move(moveV * Time.deltaTime * moveV.magnitude * 0.2f);
+                Debug.Log("2");
             }
             else
             {
                 //controller.SimpleMove(moveV);
                 controller.Move(moveV * Time.deltaTime * moveV.magnitude * 5);
+                Debug.Log("3");
             }
 
 
         }
-        //else if (Hanging)
-        //{
 
-        //    Debug.Log("hanging = " + moveV.magnitude * moveV.magnitude);
-        //    controller.Move(moveV * Time.deltaTime);
-        //}
         else if (GettingUp && GettingUpTimer - Time.fixedTime < -GetUpLength)
         {
             //controller.Move(moveV * Time.deltaTime);
             //controller.SimpleMove(moveV * Time.deltaTime * moveV.magnitude * 10);
         }
+    }
+    public virtual void Drop() {
+        // player or computer can call this function to end the hang
+        grabBox.GrabDisabled = true;
+        ResetHang();
     }
 
     public virtual void Gravity()
@@ -365,16 +392,20 @@ public class Fighter : MonoBehaviour {
         {
             LedgePos = ledgePos;
             MovementEnabled = false;
-            Hanging = true;
             animator.SetBool("Hanging", true);
+            animator.SetBool("FACING_RIGHT", direction);
             Vector3 moveV = ledgePos - HangPosition.position;
             controller.Move(moveV);
             JumpCount = 0;
+            grabBox.Grabbing = true;
         } else
         {
+            Debug.Log("cant grab ledge but called hang");
             ResetHang();
         }
     }
+
+
 
     void GetUpFromHang()
     {
@@ -389,12 +420,15 @@ public class Fighter : MonoBehaviour {
 
     }
     public virtual void ResetHang()
-    {
+    {   // resets all the flags & timers used to hang
+       
         GettingUpTimer = 0;
         animator.SetBool("Hanging", false);
         CanGrabLedge = false;
         MovementEnabled = true;
         Hanging = false;
+        grabBox.GrabDisabled = true;
+        grabBox.Grabbing = false;
     }
         
 

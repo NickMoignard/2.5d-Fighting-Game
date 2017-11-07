@@ -41,6 +41,8 @@ public class Player : Fighter
 
         animator.SetFloat("x", Left_X);
 
+
+
         if (Left_X < -0.1) // user left
         {
             FacingRight = false;
@@ -128,13 +130,21 @@ public class Player : Fighter
             }
 
         }
-
+        
 
         // Player is holding X so lets keep hanging
-        if (Input.GetButton("X") && Hanging)
+        if (Hanging)
         {
             MovementEnabled = false;
             CanGrabLedge = true;
+
+
+            // drop from hang
+            if (Left_Y < 0)
+            {
+                Debug.Log("Tried to drop");
+                Drop();
+            }
 
             if (Input.GetAxis("Right Trigger") > 0.2)
             {
@@ -142,11 +152,7 @@ public class Player : Fighter
                 EventManager.TriggerEvent("GetUp");
             }
 
-        } else
-        {
-            ResetHang();
         }
-
         if (Input.GetButtonDown("X"))
         {
             // Check Directions & other button combinations
@@ -175,11 +181,7 @@ public class Player : Fighter
                 EventManager.TriggerEvent("X");
             }           
         }
-        else
-        {
-            Grabbing = false;
-            
-        }
+       
         Run();
     }
 
